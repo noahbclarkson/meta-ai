@@ -1,7 +1,3 @@
-Here is an incredibly detailed `README.md` for your project. It documents the architecture, the custom DSL, the agentic workflow, and the self-healing capabilities demonstrated in your logs.
-
-***
-
 # Meta-AI: Self-Healing GenAI Software Factory
 
 ![Rust](https://img.shields.io/badge/built_with-Rust-dca282.svg)
@@ -216,9 +212,3 @@ LLMs often struggle with deep JSON Schema definitions ($defs, recursive refs). T
 The system uses a hybrid approach to prompting.
 - **Architecture Phase:** Uses Google's "Strict Mode" (constrained decoding) to guarantee valid JSON Schema output.
 - **Logic Phase:** Uses open-ended generation with rigid few-shot examples to handle complex recursive logic structures (like `FormatString` variable arrays) that standard schemas struggle to describe to an LLM.
-
----
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
