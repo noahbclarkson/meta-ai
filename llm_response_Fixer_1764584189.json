@@ -1,0 +1,147 @@
+[
+  {
+    "id": "calc_total_revenue",
+    "description": "Calculate total revenue from all projects.",
+    "operation": {
+      "op": "sum",
+      "list_path": "/projects",
+      "field": "revenue"
+    },
+    "output_path": "/total_revenue"
+  },
+  {
+    "id": "calc_total_hours",
+    "description": "Calculate total hours worked across all projects.",
+    "operation": {
+      "op": "sum",
+      "list_path": "/projects",
+      "field": "hours_worked"
+    },
+    "output_path": "/total_hours"
+  },
+  {
+    "id": "calc_total_costs",
+    "description": "Calculate total direct costs.",
+    "operation": {
+      "op": "sum",
+      "list_path": "/projects",
+      "field": "costs"
+    },
+    "output_path": "/total_direct_costs"
+  },
+  {
+    "id": "calc_total_overhead",
+    "description": "Calculate total overhead cost (Total Hours * Overhead Rate).",
+    "operation": {
+      "op": "multiply",
+      "a": "/total_hours",
+      "b": "/overhead_rate"
+    },
+    "output_path": "/total_overhead_cost"
+  },
+  {
+    "id": "calc_total_expenses",
+    "description": "Calculate total expenses (direct costs + overhead).",
+    "operation": {
+      "op": "add",
+      "a": "/total_direct_costs",
+      "b": "/total_overhead_cost"
+    },
+    "output_path": "/total_expenses"
+  },
+  {
+    "id": "calc_total_profit",
+    "description": "Calculate overall net profit (Revenue - Expenses).",
+    "operation": {
+      "op": "subtract",
+      "a": "/total_revenue",
+      "b": "/total_expenses"
+    },
+    "output_path": "/total_profit"
+  },
+  {
+    "id": "const_safe_denom_offset",
+    "description": "Define a small offset value (epsilon) to ensure the margin denominator is never zero.",
+    "operation": {
+      "op": "constant",
+      "value": 1e-12
+    },
+    "output_path": "/safe_denom_offset"
+  },
+  {
+    "id": "calc_safe_total_revenue",
+    "description": "Calculate a safe revenue value for margin calculation (Total Revenue + Epsilon) to prevent division by zero error.",
+    "operation": {
+      "op": "add",
+      "a": "/total_revenue",
+      "b": "/safe_denom_offset"
+    },
+    "output_path": "/safe_total_revenue"
+  },
+  {
+    "id": "calc_profit_margin",
+    "description": "Calculate overall profit margin (Total Profit / Safe Total Revenue Denominator).",
+    "operation": {
+      "op": "divide",
+      "a": "/total_profit",
+      "b": "/safe_total_revenue"
+    },
+    "output_path": "/profit_margin"
+  },
+  {
+    "id": "calc_raw_profit_per_project_list",
+    "description": "Calculate raw profit (Revenue - Costs) for each project item.",
+    "operation": {
+      "op": "calculate",
+      "list_path": "/projects",
+      "output_field": "raw_profit",
+      "operator": "subtract",
+      "a_field": "revenue",
+      "b_field": "costs"
+    },
+    "output_path": "/projects_w_raw_profit"
+  },
+  {
+    "id": "sort_projects_by_raw_profit",
+    "description": "Sort projects by raw profit descending to find the highest.",
+    "operation": {
+      "op": "sort",
+      "list_path": "/projects_w_raw_profit",
+      "field": "raw_profit",
+      "descending": true
+    },
+    "output_path": "/sorted_projects"
+  },
+  {
+    "id": "get_most_profitable_project_name",
+    "description": "Retrieve the name of the project with the highest raw profit (the first item in the sorted list).",
+    "operation": {
+      "op": "get",
+      "path": "/sorted_projects/0/name"
+    },
+    "output_path": "/most_profitable_project"
+  },
+  {
+    "id": "generate_summary",
+    "description": "Generate the final profitability summary.",
+    "operation": {
+      "op": "format_string",
+      "template": "Analysis Complete. Overall Net Profit: {total_profit}. Profit Margin (decimal): {profit_margin}. The most profitable project (by raw profit) was {most_profitable_project_name}.",
+      "variables": [
+        {
+          "key": "total_profit",
+          "path": "/total_profit"
+        },
+        {
+          "key": "profit_margin",
+          "path": "/profit_margin"
+        },
+        {
+          "key": "most_profitable_project_name",
+          "path": "/most_profitable_project"
+        }
+      ]
+    },
+    "output_path": "/summary"
+  }
+]
